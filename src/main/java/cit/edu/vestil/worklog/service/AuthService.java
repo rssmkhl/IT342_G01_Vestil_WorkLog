@@ -44,6 +44,7 @@ public class AuthService {
         user.setEmail(registerRequest.getEmail());
         user.setUsername(registerRequest.getUsername());
         user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
+        user.setRole(resolveRole(registerRequest.getUsername()));
 
         userRepository.save(user);
     }
@@ -61,7 +62,26 @@ public class AuthService {
                 loginRequest.getUsernameOrEmail()
         ).orElseThrow(() -> new RuntimeException("User not found"));
 
-        String token = jwtUtil.generateToken(user.getUsername(), user.getId(), user.getFullName());
-        return new AuthResponse(token, user.getId(), user.getFullName(), user.getUsername(), user.getEmail());
+        String role = normalizeRole(user.getRole(), user.getUsername());
+        if (!role.equals(user.getRole())) {
+            user.setRole(role);
+            userRepository.save(user);
+        }
+        String token = jwtUtil.generateToken(user.getUsername(), user.getId(), user.getFullName(), role);
+        return new AuthResponse(token, user.getId(), user.getFullName(), user.getUsername(), user.getEmail(), role);
+    }
+
+    private String resolveRole(String username) {
+        if (userRepository.count() == 0 || "admin".equalsIgnoreCase(username)) {
+            return "ADMIN";
+        }
+        return "USER";
+    }
+
+    private String normalizeRole(String role, String username) {
+        if (role != null && !role.isBlank()) {
+            return role;
+        }
+        return "admin".equalsIgnoreCase(username) ? "ADMIN" : "USER";
     }
 }

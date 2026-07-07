@@ -1,5 +1,6 @@
 package cit.edu.vestil.worklog.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -24,6 +25,17 @@ public class User {
     @Column(unique = true, nullable = false)
     private String username;
 
+    @Column
+    private String role = "USER";
+
+    @JsonIgnore
     @Column(nullable = false)
     private String password;
+
+    @PrePersist
+    public void prePersist() {
+        if (role == null || role.isBlank()) {
+            role = "USER";
+        }
+    }
 }

@@ -3,6 +3,8 @@ import authService from '../services/authService';
 
 const Sidebar = () => {
   const navigate = useNavigate();
+  const user = authService.getCurrentUser();
+  const isAdmin = user?.role === 'ADMIN';
 
   const handleLogout = () => {
     authService.logout();
@@ -27,6 +29,11 @@ const Sidebar = () => {
         <Link to="/dashboard/payments" className="sidebar-link">
           Payments
         </Link>
+        {isAdmin ? (
+          <Link to="/dashboard/admin" className="sidebar-link">
+            Admin
+          </Link>
+        ) : null}
         <button onClick={handleLogout} className="sidebar-link sidebar-logout">
           Logout
         </button>
