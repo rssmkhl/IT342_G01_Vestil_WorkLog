@@ -24,6 +24,7 @@ class RegisterActivity : AppCompatActivity() {
         // Setup role dropdown
         val adapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, roles)
         binding.etRole.setAdapter(adapter)
+        binding.etRole.setText(roles.first(), false)
 
         binding.btnRegister.setOnClickListener { register() }
         binding.tvLogin.setOnClickListener { finish() }
@@ -35,7 +36,7 @@ class RegisterActivity : AppCompatActivity() {
         val username = binding.etUsername.text.toString().trim()
         val password = binding.etPassword.text.toString().trim()
         val confirmPassword = binding.etConfirmPassword.text.toString().trim()
-        val role = binding.etRole.text.toString().trim()
+        val role = binding.etRole.text.toString().trim().ifBlank { "USER" }
 
         if (fullName.isEmpty() || email.isEmpty() || username.isEmpty() || 
             password.isEmpty() || confirmPassword.isEmpty()) {

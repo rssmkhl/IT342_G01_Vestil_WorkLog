@@ -2,18 +2,18 @@ package cit.edu.vestil.worklog.ui.dashboard
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.LinearLayoutManager
-import cit.edu.vestil.worklog.R
 import cit.edu.vestil.worklog.data.api.RetrofitClient
 import cit.edu.vestil.worklog.data.preferences.UserPreferences
 import cit.edu.vestil.worklog.databinding.ActivityDashboardBinding
+import cit.edu.vestil.worklog.ui.admin.AdminDashboardActivity
 import cit.edu.vestil.worklog.ui.auth.LoginActivity
 import cit.edu.vestil.worklog.ui.client.ClientsActivity
 import cit.edu.vestil.worklog.ui.payment.PaymentsActivity
-import cit.edu.vestil.worklog.ui.worklog.WorkLogAdapter
 import cit.edu.vestil.worklog.ui.worklog.WorkLogsActivity
+import cit.edu.vestil.worklog.ui.navigation.AppNavigator
 import kotlinx.coroutines.launch
 
 class DashboardActivity : AppCompatActivity() {
@@ -24,9 +24,10 @@ class DashboardActivity : AppCompatActivity() {
         binding = ActivityDashboardBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.tvUserName.text = UserPreferences.getUserName()
+        val userName = UserPreferences.getUserName().orEmpty().ifBlank { "User" }
+        binding.tvUserName.text = "Welcome, $userName!"
+        AppNavigator.setup(binding.root, this, AppNavigator.DASHBOARD)
 
-        binding.btnLogout.setOnClickListener { logout() }
         binding.cardClients.setOnClickListener {
             startActivity(Intent(this, ClientsActivity::class.java))
         }
@@ -36,9 +37,12 @@ class DashboardActivity : AppCompatActivity() {
         binding.cardPayments.setOnClickListener {
             startActivity(Intent(this, PaymentsActivity::class.java))
         }
-
-        binding.rvRecentWorkLogs.layoutManager = LinearLayoutManager(this)
-        binding.rvRecentWorkLogs.adapter = WorkLogAdapter(emptyList())
+        if (UserPreferences.getUserRole() == "ADMIN") {
+            binding.cardAdminShortcut.visibility = View.VISIBLE
+            binding.cardAdminShortcut.setOnClickListener {
+                startActivity(Intent(this, AdminDashboardActivity::class.java))
+            }
+        }
 
         loadDashboardSummary()
     }
@@ -57,11 +61,5 @@ class DashboardActivity : AppCompatActivity() {
                 e.printStackTrace()
             }
         }
-    }
-
-    private fun logout() {
-        UserPreferences.clear()
-        startActivity(Intent(this, LoginActivity::class.java))
-        finishAffinity()
     }
 }

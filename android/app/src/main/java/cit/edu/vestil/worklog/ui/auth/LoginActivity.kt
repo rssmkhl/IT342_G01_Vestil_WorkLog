@@ -11,7 +11,6 @@ import cit.edu.vestil.worklog.data.api.RetrofitClient
 import cit.edu.vestil.worklog.data.model.LoginRequest
 import cit.edu.vestil.worklog.data.preferences.UserPreferences
 import cit.edu.vestil.worklog.databinding.ActivityLoginBinding
-import cit.edu.vestil.worklog.ui.admin.AdminDashboardActivity
 import cit.edu.vestil.worklog.ui.dashboard.DashboardActivity
 import kotlinx.coroutines.launch
 
@@ -77,12 +76,7 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun navigateToDashboard() {
-        val role = UserPreferences.getUserRole()
-        if (role == "ADMIN") {
-            startActivity(Intent(this, AdminDashboardActivity::class.java))
-        } else {
-            startActivity(Intent(this, DashboardActivity::class.java))
-        }
+        startActivity(Intent(this, DashboardActivity::class.java))
         finish()
     }
 }
