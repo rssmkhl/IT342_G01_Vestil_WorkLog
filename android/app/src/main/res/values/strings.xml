@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Worklog</string>
+    <string name="passwords_not_match">Passwords do not match</string>
+    <string name="login">Login</string>
+    <string name="register">Register</string>
+    <string name="full_name">Full Name</string>
+    <string name="email">Email</string>
+    <string name="username">Username</string>
+    <string name="username_or_email">Username or Email</string>
+    <string name="password">Password</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="role">Role</string>
+    <string name="welcome">Welcome</string>
+    <string name="recent_work_logs">Recent Work Logs</string>
+    <string name="clients">Clients</string>
+    <string name="work_logs">Work Logs</string>
+    <string name="payments">Payments</string>
+    <string name="logout">Logout</string>
+    <string name="admin_dashboard">Admin Dashboard</string>
+    <string name="clients_screen_title">Clients</string>
+    <string name="payments_screen_title">Payments</string>
+    <string name="work_logs_screen_title">Work Logs</string>
+    <string name="back_to_login">Already have an account? Login</string>
+    <string name="go_to_register">No account yet? Register</string>
+</resources>

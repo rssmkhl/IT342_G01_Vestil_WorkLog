@@ -38,6 +38,7 @@ class DashboardActivity : AppCompatActivity() {
         }
 
         binding.rvRecentWorkLogs.layoutManager = LinearLayoutManager(this)
+        binding.rvRecentWorkLogs.adapter = WorkLogAdapter(emptyList())
 
         loadDashboardSummary()
     }
@@ -51,7 +52,6 @@ class DashboardActivity : AppCompatActivity() {
                     binding.tvTotalClients.text = summary.totalClients.toString()
                     binding.tvTotalWorkLogs.text = summary.totalWorkLogs.toString()
                     binding.tvTotalPayments.text = "$${summary.totalPayments}"
-                    binding.rvRecentWorkLogs.adapter = WorkLogAdapter(summary.recentWorkLogs)
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
