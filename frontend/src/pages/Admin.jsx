@@ -5,6 +5,7 @@ import authService from '../services/authService';
 const Admin = () => {
   const [summary, setSummary] = useState({ totalUsers: 0, totalClients: 0, totalWorkLogs: 0, pendingPayments: 0 });
   const [users, setUsers] = useState([]);
+  const [clients, setClients] = useState([]);
   const [worklogs, setWorklogs] = useState([]);
   const [payments, setPayments] = useState([]);
   const [message, setMessage] = useState('');
@@ -15,14 +16,16 @@ const Admin = () => {
   const loadAdminData = async () => {
     setError('');
     try {
-      const [summaryResponse, usersResponse, worklogsResponse, paymentsResponse] = await Promise.all([
+      const [summaryResponse, usersResponse, clientsResponse, worklogsResponse, paymentsResponse] = await Promise.all([
         api.get('/admin/summary'),
         api.get('/admin/users'),
+        api.get('/admin/clients'),
         api.get('/admin/worklogs'),
         api.get('/admin/payments'),
       ]);
       setSummary(summaryResponse.data);
       setUsers(usersResponse.data);
+      setClients(clientsResponse.data);
       setWorklogs(worklogsResponse.data);
       setPayments(paymentsResponse.data);
     } catch (error) {
@@ -126,6 +129,34 @@ const Admin = () => {
                       Delete
                     </button>
                   </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div className="card list-card">
+        <h3>All Clients</h3>
+        <div className="table-wrap">
+          <table className="admin-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Company</th>
+                <th>Added By</th>
+              </tr>
+            </thead>
+            <tbody>
+              {clients.map((client) => (
+                <tr key={client.id}>
+                  <td>{client.name}</td>
+                  <td>{client.email}</td>
+                  <td>{client.phone || 'N/A'}</td>
+                  <td>{client.company || 'N/A'}</td>
+                  <td>{client.userName}</td>
                 </tr>
               ))}
             </tbody>

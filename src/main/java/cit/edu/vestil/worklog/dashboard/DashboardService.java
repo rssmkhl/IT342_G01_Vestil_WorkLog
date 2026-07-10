@@ -1,6 +1,7 @@
 package cit.edu.vestil.worklog.dashboard;
 
 import cit.edu.vestil.worklog.client.ClientRepository;
+import cit.edu.vestil.worklog.common.entity.User;
 import cit.edu.vestil.worklog.payment.PaymentRepository;
 import cit.edu.vestil.worklog.worklog.WorkLogRepository;
 import lombok.AllArgsConstructor;
@@ -16,10 +17,10 @@ public class DashboardService {
     private final WorkLogRepository workLogRepository;
     private final PaymentRepository paymentRepository;
 
-    public DashboardSummary getSummary() {
-        long totalClients = clientRepository.count();
-        long totalWorkLogs = workLogRepository.count();
-        BigDecimal totalPayments = paymentRepository.sumAmount();
+    public DashboardSummary getSummary(User user) {
+        long totalClients = clientRepository.countByUser(user);
+        long totalWorkLogs = workLogRepository.countByUser(user);
+        BigDecimal totalPayments = paymentRepository.sumAmountByUser(user);
         if (totalPayments == null) {
             totalPayments = BigDecimal.ZERO.setScale(2);
         } else {

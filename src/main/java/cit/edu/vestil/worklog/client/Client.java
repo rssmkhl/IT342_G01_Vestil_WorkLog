@@ -2,12 +2,15 @@ package cit.edu.vestil.worklog.client;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import cit.edu.vestil.worklog.common.entity.User;
+import cit.edu.vestil.worklog.payment.Payment;
+import cit.edu.vestil.worklog.worklog.WorkLog;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "clients")
@@ -35,6 +38,14 @@ public class Client {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Payment> payments;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<WorkLog> workLogs;
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;

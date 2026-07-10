@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import api from '../services/api';
 
-const emptyForm = { clientId: '', amount: '', method: 'Cash', status: 'Pending', reference: '' };
+const emptyForm = { id: null, clientId: '', amount: '', method: 'Cash', status: 'Pending', reference: '' };
 
 const Payments = () => {
   const [payments, setPayments] = useState([]);
@@ -10,6 +10,7 @@ const Payments = () => {
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [editingId, setEditingId] = useState(null);
 
   const loadPayments = async () => {
     try {
@@ -33,6 +34,37 @@ const Payments = () => {
     loadPayments();
     loadClients();
   }, []);
+
+  const handleEdit = (payment) => {
+    setEditingId(payment.id);
+    setForm({
+      id: payment.id,
+      clientId: payment.client?.id || '',
+      amount: payment.amount,
+      method: payment.method || 'Cash',
+      status: payment.status || 'Pending',
+      reference: payment.reference || ''
+    });
+  };
+
+  const handleDelete = async (id) => {
+    if (window.confirm('Are you sure you want to delete this payment?')) {
+      try {
+        await api.delete(`/payments/${id}`);
+        setMessage('Payment deleted successfully!');
+        loadPayments();
+      } catch (error) {
+        setError('Failed to delete payment.');
+      }
+    }
+  };
+
+  const handleCancel = () => {
+    setEditingId(null);
+    setForm(emptyForm);
+    setError('');
+    setMessage('');
+  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -62,18 +94,30 @@ const Payments = () => {
 
     setIsSubmitting(true);
     try {
-      await api.post('/payments', {
-        amount: amountValue,
-        method: form.method,
-        status: form.status,
-        reference: form.reference,
-        client: { id: Number(form.clientId) },
-      });
+      if (editingId) {
+        await api.put(`/payments/${editingId}`, {
+          amount: amountValue,
+          method: form.method,
+          status: form.status,
+          reference: form.reference,
+          client: { id: Number(form.clientId) },
+        });
+        setMessage('Payment updated successfully!');
+      } else {
+        await api.post('/payments', {
+          amount: amountValue,
+          method: form.method,
+          status: form.status,
+          reference: form.reference,
+          client: { id: Number(form.clientId) },
+        });
+        setMessage('Payment recorded successfully.');
+      }
+      setEditingId(null);
       setForm(emptyForm);
-      setMessage('Payment recorded successfully.');
       loadPayments();
     } catch (submitError) {
-      setError('Failed to record payment. Please try again.');
+      setError(editingId ? 'Failed to update payment. Please try again.' : 'Failed to record payment. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -142,19 +186,36 @@ const Payments = () => {
             />
           </div>
         </div>
-        <button className="auth-button" type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Saving...' : 'Record Payment'}
-        </button>
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+          <button className="auth-button" type="submit" disabled={isSubmitting}>
+            {isSubmitting ? 'Saving...' : editingId ? 'Update Payment' : 'Record Payment'}
+          </button>
+          {editingId && (
+            <button type="button" onClick={handleCancel} style={{ padding: '10px 20px', borderRadius: '4px', border: '1px solid #ccc', cursor: 'pointer' }}>
+              Cancel
+            </button>
+          )}
+        </div>
       </form>
       <div className="card list-card">
         <h3>Payment History</h3>
         {payments.length === 0 ? <p>No payments recorded yet.</p> : (
           <ul className="resource-list">
             {payments.map((payment) => (
-              <li key={payment.id}>
-                <strong>${Number(payment.amount || 0).toFixed(2)}</strong>
-                <span>{payment.client?.name || 'No client'} - {payment.method || 'Cash'} - {payment.status || 'Pending'}</span>
-                <small>{payment.reference || 'No reference'}</small>
+              <li key={payment.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <strong>${Number(payment.amount || 0).toFixed(2)}</strong>
+                  <span>{payment.client?.name || 'No client'} - {payment.method || 'Cash'} - {payment.status || 'Pending'}</span>
+                  <small>{payment.reference || 'No reference'}</small>
+                </div>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <button onClick={() => handleEdit(payment)} style={{ padding: '5px 10px', fontSize: '12px' }}>
+                    Edit
+                  </button>
+                  <button onClick={() => handleDelete(payment.id)} style={{ padding: '5px 10px', fontSize: '12px' }}>
+                    Delete
+                  </button>
+                </div>
               </li>
             ))}
           </ul>

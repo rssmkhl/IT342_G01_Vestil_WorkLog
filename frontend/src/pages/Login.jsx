@@ -27,8 +27,13 @@ const Login = () => {
     setLoading(true);
     setMessage('');
     try {
-      await authService.login(formData);
-      navigate('/dashboard');
+      const response = await authService.login(formData);
+      // Navigate based on role
+      if (response.role === 'ADMIN') {
+        navigate('/dashboard/admin');
+      } else {
+        navigate('/dashboard');
+      }
     } catch (error) {
       setMessage(error.response?.data?.message || 'Invalid username/email or password');
       setMessageType('error');
@@ -75,7 +80,13 @@ const Login = () => {
           </button>
         </form>
         <p className="auth-link">
+          Forgot your password? <Link to="/forgot-password">Reset here</Link>
+        </p>
+        <p className="auth-link">
           Don't have an account? <Link to="/register">Sign up here</Link>
+        </p>
+        <p className="auth-link">
+          <Link to="/admin/login">Login as Admin</Link>
         </p>
       </div>
     </div>

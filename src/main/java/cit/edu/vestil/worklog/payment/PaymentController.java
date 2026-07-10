@@ -29,6 +29,14 @@ public class PaymentController {
         return paymentRepository.findByUserOrderByPaymentDateDesc(user);
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<Payment> getPaymentById(@PathVariable Long id, Principal principal) {
+        User user = loadUser(principal);
+        Payment payment = paymentRepository.findByIdAndUser(id, user)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Payment not found"));
+        return ResponseEntity.ok(payment);
+    }
+
     @PostMapping
     public ResponseEntity<Payment> createPayment(@RequestBody Payment payment, Principal principal) {
         User user = loadUser(principal);
@@ -43,6 +51,50 @@ public class PaymentController {
             payment.setAmount(BigDecimal.ZERO);
         }
         return ResponseEntity.ok(paymentRepository.save(payment));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Payment> updatePayment(@PathVariable Long id, @RequestBody Payment paymentDetails, Principal principal) {
+        User user = loadUser(principal);
+        Payment payment = paymentRepository.findByIdAndUser(id, user)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Payment not found"));
+
+        if (paymentDetails.getClient() != null && paymentDetails.getClient().getId() != null) {
+            Client client = clientRepository.findByIdAndUser(paymentDetails.getClient().getId(), user)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Client not found"));
+            payment.setClient(client);
+        }
+
+        if (paymentDetails.getAmount() != null) {
+            payment.setAmount(paymentDetails.getAmount());
+        }
+
+        if (paymentDetails.getMethod() != null) {
+            payment.setMethod(paymentDetails.getMethod());
+        }
+
+        if (paymentDetails.getStatus() != null) {
+            payment.setStatus(paymentDetails.getStatus());
+        }
+
+        if (paymentDetails.getReference() != null) {
+            payment.setReference(paymentDetails.getReference());
+        }
+
+        if (paymentDetails.getPaymentDate() != null) {
+            payment.setPaymentDate(paymentDetails.getPaymentDate());
+        }
+
+        return ResponseEntity.ok(paymentRepository.save(payment));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deletePayment(@PathVariable Long id, Principal principal) {
+        User user = loadUser(principal);
+        Payment payment = paymentRepository.findByIdAndUser(id, user)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Payment not found"));
+        paymentRepository.delete(payment);
+        return ResponseEntity.noContent().build();
     }
 
     private User loadUser(Principal principal) {

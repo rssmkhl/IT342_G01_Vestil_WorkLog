@@ -12,4 +12,6 @@ public interface ClientRepository extends JpaRepository<Client, Long> {
     Optional<Client> findByIdAndUser(Long id, User user);
 
     void deleteByUser(User user);
+
+    long countByUser(User user);
 }

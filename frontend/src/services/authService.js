@@ -10,16 +10,34 @@ const authService = {
     const response = await api.post('/auth/login', credentials);
     if (response.data.token) {
       localStorage.setItem('token', response.data.token);
+      // Also store user data separately for convenience
+      localStorage.setItem('user', JSON.stringify({
+        id: response.data.id,
+        fullName: response.data.fullName,
+        username: response.data.username,
+        email: response.data.email,
+        role: response.data.role
+      }));
     }
     return response.data;
   },
 
   logout() {
     localStorage.removeItem('token');
+    localStorage.removeItem('user');
   },
 
   getCurrentUser() {
-    const token = localStorage.getItem('token');
+    // First try to get from localStorage user data, then fall back to token
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      try {
+        return JSON.parse(userStr);
+      } catch (e) {
+        // ignore, fall back to token
+      }
+    }
+    const token = this.getToken();
     if (!token) return null;
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));

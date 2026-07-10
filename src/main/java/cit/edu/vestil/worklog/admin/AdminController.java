@@ -1,5 +1,6 @@
 package cit.edu.vestil.worklog.admin;
 
+import cit.edu.vestil.worklog.client.Client;
 import cit.edu.vestil.worklog.client.ClientRepository;
 import cit.edu.vestil.worklog.common.entity.User;
 import cit.edu.vestil.worklog.common.repository.UserRepository;
@@ -81,6 +82,15 @@ public class AdminController {
                 .toList();
     }
 
+    @GetMapping("/clients")
+    @Transactional(readOnly = true)
+    public List<ClientRow> getClients() {
+        return clientRepository.findAll(Sort.by(Sort.Direction.DESC, "createdAt"))
+                .stream()
+                .map(this::toClientRow)
+                .toList();
+    }
+
     @GetMapping("/payments")
     @Transactional(readOnly = true)
     public List<PaymentRow> getPayments() {
@@ -88,6 +98,18 @@ public class AdminController {
                 .stream()
                 .map(this::toPaymentRow)
                 .toList();
+    }
+
+    private ClientRow toClientRow(Client client) {
+        return new ClientRow(
+                client.getId(),
+                client.getName(),
+                client.getEmail(),
+                client.getPhone(),
+                client.getCompany(),
+                client.getNotes(),
+                client.getUser() != null ? client.getUser().getFullName() : "Unknown user"
+        );
     }
 
     private WorkLogRow toWorkLogRow(WorkLog workLog) {
@@ -132,6 +154,17 @@ public class AdminController {
     }
 
     public record UserRow(Long id, String fullName, String username, String email, String role) {
+    }
+
+    public record ClientRow(
+            Long id,
+            String name,
+            String email,
+            String phone,
+            String company,
+            String notes,
+            String userName
+    ) {
     }
 
     public record WorkLogRow(

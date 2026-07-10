@@ -1,9 +1,10 @@
 package cit.edu.vestil.worklog;
 
-import cit.edu.vestil.worklog.repository.ClientRepository;
-import cit.edu.vestil.worklog.repository.PaymentRepository;
-import cit.edu.vestil.worklog.repository.WorkLogRepository;
-import cit.edu.vestil.worklog.service.DashboardService;
+import cit.edu.vestil.worklog.client.ClientRepository;
+import cit.edu.vestil.worklog.common.entity.User;
+import cit.edu.vestil.worklog.dashboard.DashboardService;
+import cit.edu.vestil.worklog.payment.PaymentRepository;
+import cit.edu.vestil.worklog.worklog.WorkLogRepository;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -19,14 +20,14 @@ class DashboardServiceTest {
         ClientRepository clientRepository = Mockito.mock(ClientRepository.class);
         WorkLogRepository workLogRepository = Mockito.mock(WorkLogRepository.class);
         PaymentRepository paymentRepository = Mockito.mock(PaymentRepository.class);
+        User mockUser = Mockito.mock(User.class);
 
-        when(clientRepository.count()).thenReturn(0L);
-        when(workLogRepository.count()).thenReturn(0L);
-        when(paymentRepository.count()).thenReturn(0L);
-        when(paymentRepository.sumAmount()).thenReturn(BigDecimal.ZERO);
+        when(clientRepository.countByUser(mockUser)).thenReturn(0L);
+        when(workLogRepository.countByUser(mockUser)).thenReturn(0L);
+        when(paymentRepository.sumAmountByUser(mockUser)).thenReturn(BigDecimal.ZERO);
 
         DashboardService dashboardService = new DashboardService(clientRepository, workLogRepository, paymentRepository);
-        DashboardService.DashboardSummary summary = dashboardService.getSummary();
+        DashboardService.DashboardSummary summary = dashboardService.getSummary(mockUser);
 
         assertEquals(0L, summary.getTotalClients());
         assertEquals(0L, summary.getTotalWorkLogs());
