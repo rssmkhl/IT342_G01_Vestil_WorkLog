@@ -1,9 +1,8 @@
 package cit.edu.vestil.worklog.data.model
 
-import java.math.BigDecimal
-
-data class DashboardSummary(
+data class AdminSummary(
+    val totalUsers: Long = 0,
     val totalClients: Long = 0,
     val totalWorkLogs: Long = 0,
-    val totalPayments: BigDecimal = BigDecimal.ZERO
+    val pendingPayments: Long = 0
 )

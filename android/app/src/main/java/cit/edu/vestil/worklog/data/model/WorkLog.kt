@@ -1,13 +1,13 @@
 package cit.edu.vestil.worklog.data.model
 
-import java.time.LocalDate
-import java.time.LocalDateTime
-
 data class WorkLog(
     val id: Long? = null,
+    val title: String = "",
+    val description: String? = null,
+    val date: String? = null,
+    val hours: Double? = null,
+    val status: String? = null,
+    val project: String? = null,
     val client: Client? = null,
-    val date: LocalDate,
-    val description: String,
-    val hours: Double,
-    val createdAt: LocalDateTime? = null
+    val createdAt: String? = null
 )
