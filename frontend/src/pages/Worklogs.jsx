@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Eye, FileText, Pencil, Trash2 } from 'lucide-react';
 import api from '../services/api';
 
 const emptyForm = { title: '', description: '', date: '', hours: '', status: 'In Progress', project: '' };
@@ -82,39 +83,73 @@ const Worklogs = () => {
       <div className="page-header">
         <div>
           <h2>Work Logs</h2>
-          <p>Record tasks, durations, and project progress.</p>
+          <p>Log time, track progress, and keep project entries organized.</p>
+        </div>
+        <div className="header-actions">
+          {editingId && (
+            <button type="button" className="auth-button auth-button--secondary" onClick={cancelEdit}>
+              Cancel Edit
+            </button>
+          )}
         </div>
       </div>
       {message ? <div className="alert success">{message}</div> : null}
 
-      {/* Work Log Details View */}
       {viewingWorklog && (
-        <div className="card">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-            <h3>Work Log Details</h3>
-            <button onClick={() => setViewingWorklog(null)} className="auth-button" style={{ padding: '0.5rem 1rem' }}>Close</button>
+        <div className="card detail-view-card">
+          <div className="card-header">
+            <div>
+              <h3>Work Log Details</h3>
+              <p>Focused detail view with structured fields and action choices.</p>
+            </div>
+            <button onClick={() => setViewingWorklog(null)} className="auth-button auth-button--secondary">
+              Close
+            </button>
           </div>
-          <div>
-            <p><strong>Title:</strong> {viewingWorklog.title}</p>
-            <p><strong>Project:</strong> {viewingWorklog.project || 'General'}</p>
-            <p><strong>Date:</strong> {viewingWorklog.date || 'N/A'}</p>
-            <p><strong>Hours:</strong> {viewingWorklog.hours || 0}h</p>
-            <p><strong>Status:</strong> {viewingWorklog.status || 'In Progress'}</p>
-            <p><strong>Description:</strong> {viewingWorklog.description || 'N/A'}</p>
+          <div className="detail-grid">
+            <div className="detail-field">
+              <p className="detail-label">Title</p>
+              <p className="detail-value">{viewingWorklog.title}</p>
+            </div>
+            <div className="detail-field">
+              <p className="detail-label">Project</p>
+              <p className="detail-value">{viewingWorklog.project || 'General'}</p>
+            </div>
+            <div className="detail-field">
+              <p className="detail-label">Date</p>
+              <p className="detail-value">{viewingWorklog.date || 'N/A'}</p>
+            </div>
+            <div className="detail-field">
+              <p className="detail-label">Hours</p>
+              <p className="detail-value">{viewingWorklog.hours || 0}h</p>
+            </div>
           </div>
-          <div style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem' }}>
-            <button onClick={() => handleEdit(viewingWorklog)} className="auth-button">Edit</button>
-            <button onClick={() => handleDelete(viewingWorklog.id)} className="danger-button">Delete</button>
+          <div className="detail-notes">
+            <p className="detail-label">Description</p>
+            <p className="detail-value">{viewingWorklog.description || 'N/A'}</p>
+          </div>
+          <div className="card-actions">
+            <button onClick={() => handleEdit(viewingWorklog)} className="auth-button">
+              <Pencil size={14} /> Edit
+            </button>
+            <button onClick={() => handleDelete(viewingWorklog.id)} className="danger-button">
+              <Trash2 size={14} /> Delete
+            </button>
           </div>
         </div>
       )}
 
       {!viewingWorklog && (
         <form className="card form-card" onSubmit={handleSubmit}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-            <h3>{editingId ? 'Edit Work Log' : 'Add New Work Log'}</h3>
+          <div className="card-header">
+            <div>
+              <h3>{editingId ? 'Edit Work Log' : 'Add New Work Log'}</h3>
+              <p>{editingId ? 'Update logged work details.' : 'Create a new work log entry.'}</p>
+            </div>
             {editingId && (
-              <button type="button" onClick={cancelEdit} style={{ padding: '0.5rem 1rem' }}>Cancel</button>
+              <button type="button" className="auth-button auth-button--secondary" onClick={cancelEdit}>
+                Cancel
+              </button>
             )}
           </div>
           <div className="form-grid">
@@ -148,26 +183,56 @@ const Worklogs = () => {
       )}
 
       <div className="card list-card">
-        <h3>Recent Entries</h3>
-        {worklogs.length === 0 ? <p>No work logs recorded yet.</p> : (
-          <ul className="resource-list">
-            {worklogs.map((entry) => (
-              <li key={entry.id} style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div>
-                    <strong>{entry.title}</strong>
-                    <span>{entry.project || 'General'} • {entry.hours || 0}h</span>
-                    <small>{entry.status || 'In Progress'}</small>
-                  </div>
-                  <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <button onClick={() => handleView(entry)} className="auth-button" style={{ padding: '0.25rem 0.5rem', fontSize: '0.875rem' }}>View</button>
-                    <button onClick={() => handleEdit(entry)} className="auth-button" style={{ padding: '0.25rem 0.5rem', fontSize: '0.875rem' }}>Edit</button>
-                    <button onClick={() => handleDelete(entry.id)} className="danger-button" style={{ padding: '0.25rem 0.5rem', fontSize: '0.875rem' }}>Delete</button>
-                  </div>
-                </div>
-              </li>
-            ))}
-          </ul>
+        <div className="card-header">
+          <div>
+            <h3>Recent Entries</h3>
+            <p>View recent work log entries at a glance.</p>
+          </div>
+        </div>
+        {worklogs.length === 0 ? (
+          <div className="empty-state">
+            <FileText size={24} />
+            <p>No work logs recorded yet.</p>
+          </div>
+        ) : (
+          <div className="table-wrap">
+            <table className="admin-table">
+              <thead>
+                <tr>
+                  <th>Title</th>
+                  <th>Project</th>
+                  <th>Date</th>
+                  <th>Hours</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {worklogs.map((entry) => (
+                  <tr key={entry.id}>
+                    <td>{entry.title}</td>
+                    <td>{entry.project || 'General'}</td>
+                    <td>{entry.date || '—'}</td>
+                    <td>{entry.hours || 0}</td>
+                    <td>{entry.status || 'In Progress'}</td>
+                    <td>
+                      <div className="action-group">
+                        <button type="button" className="table-action-btn" onClick={() => handleView(entry)}>
+                          <Eye size={14} /> View
+                        </button>
+                        <button type="button" className="table-action-btn" onClick={() => handleEdit(entry)}>
+                          <Pencil size={14} /> Edit
+                        </button>
+                        <button type="button" className="table-action-btn table-action-btn--danger" onClick={() => handleDelete(entry.id)}>
+                          <Trash2 size={14} /> Del
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
     </div>

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Eye, Pencil, Trash2, Users } from 'lucide-react';
 import api from '../services/api';
 
 const emptyForm = { name: '', email: '', phone: '', company: '', notes: '' };
@@ -81,26 +82,52 @@ const Clients = () => {
       <div className="page-header">
         <div>
           <h2>Clients</h2>
-          <p>Manage client relationships and project contacts.</p>
+          <p>Manage client relationships and business contacts.</p>
+        </div>
+        <div className="header-actions">
+          {editingId ? (
+            <button type="button" className="auth-button auth-button--secondary" onClick={cancelEdit}>
+              Cancel Edit
+            </button>
+          ) : null}
         </div>
       </div>
       {message ? <div className="alert success">{message}</div> : null}
-      
-      {/* Client Details View */}
+
       {viewingClient && (
-        <div className="card">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-            <h3>Client Details</h3>
-            <button onClick={() => setViewingClient(null)} className="auth-button" style={{ padding: '0.5rem 1rem' }}>Close</button>
+        <div className="card detail-view-card">
+          <div className="card-header">
+            <div>
+              <h3>Client Details</h3>
+              <p>Review full client information with a clean, focused view.</p>
+            </div>
+            <button onClick={() => setViewingClient(null)} className="auth-button auth-button--secondary">
+              Close
+            </button>
           </div>
-          <div>
-            <p><strong>Name:</strong> {viewingClient.name}</p>
-            <p><strong>Email:</strong> {viewingClient.email}</p>
-            <p><strong>Phone:</strong> {viewingClient.phone || 'N/A'}</p>
-            <p><strong>Company:</strong> {viewingClient.company || 'N/A'}</p>
-            <p><strong>Notes:</strong> {viewingClient.notes || 'N/A'}</p>
+          <div className="detail-grid">
+            <div className="detail-field">
+              <p className="detail-label">Name</p>
+              <p className="detail-value">{viewingClient.name}</p>
+            </div>
+            <div className="detail-field">
+              <p className="detail-label">Email</p>
+              <p className="detail-value">{viewingClient.email}</p>
+            </div>
+            <div className="detail-field">
+              <p className="detail-label">Phone</p>
+              <p className="detail-value">{viewingClient.phone || 'N/A'}</p>
+            </div>
+            <div className="detail-field">
+              <p className="detail-label">Company</p>
+              <p className="detail-value">{viewingClient.company || 'N/A'}</p>
+            </div>
           </div>
-          <div style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem' }}>
+          <div className="detail-notes">
+            <p className="detail-label">Notes</p>
+            <p className="detail-value">{viewingClient.notes || 'N/A'}</p>
+          </div>
+          <div className="card-actions">
             <button onClick={() => handleEdit(viewingClient)} className="auth-button">Edit</button>
             <button onClick={() => handleDelete(viewingClient.id)} className="danger-button">Delete</button>
           </div>
@@ -109,11 +136,16 @@ const Clients = () => {
 
       {!viewingClient && (
         <form className="card form-card" onSubmit={handleSubmit}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-            <h3>{editingId ? 'Edit Client' : 'Add New Client'}</h3>
-            {editingId && (
-              <button type="button" onClick={cancelEdit} style={{ padding: '0.5rem 1rem' }}>Cancel</button>
-            )}
+          <div className="card-header">
+            <div>
+              <h3>{editingId ? 'Edit Client' : 'Add New Client'}</h3>
+              <p>{editingId ? 'Update client contact details.' : 'Create a new client record.'}</p>
+            </div>
+            {editingId ? (
+              <button type="button" className="auth-button auth-button--secondary" onClick={cancelEdit}>
+                Cancel
+              </button>
+            ) : null}
           </div>
           <div className="form-grid">
             <div className="form-group">
@@ -142,26 +174,52 @@ const Clients = () => {
       )}
 
       <div className="card list-card">
-        <h3>Recent Clients</h3>
-        {clients.length === 0 ? <p>No clients added yet.</p> : (
-          <ul className="resource-list">
-            {clients.map((client) => (
-              <li key={client.id} style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div>
-                    <strong>{client.name}</strong>
-                    <span>{client.email}</span>
-                    <small>{client.company || 'Independent'}</small>
-                  </div>
-                  <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <button onClick={() => handleView(client)} className="auth-button" style={{ padding: '0.25rem 0.5rem', fontSize: '0.875rem' }}>View</button>
-                    <button onClick={() => handleEdit(client)} className="auth-button" style={{ padding: '0.25rem 0.5rem', fontSize: '0.875rem' }}>Edit</button>
-                    <button onClick={() => handleDelete(client.id)} className="danger-button" style={{ padding: '0.25rem 0.5rem', fontSize: '0.875rem' }}>Delete</button>
-                  </div>
-                </div>
-              </li>
-            ))}
-          </ul>
+        <div className="card-header">
+          <div>
+            <h3>Recent Clients</h3>
+            <p>Latest client contacts added to your workspace.</p>
+          </div>
+        </div>
+        {clients.length === 0 ? (
+          <div className="empty-state">
+            <Users size={24} />
+            <p>No clients added yet.</p>
+          </div>
+        ) : (
+          <div className="table-wrap">
+            <table className="admin-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Company</th>
+                  <th style={{ width: '180px' }}>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {clients.map((client) => (
+                  <tr key={client.id}>
+                    <td>{client.name}</td>
+                    <td>{client.email}</td>
+                    <td>{client.company || 'Independent'}</td>
+                    <td>
+                      <div className="action-group">
+                        <button type="button" className="table-action-btn" onClick={() => handleView(client)}>
+                          <Eye size={14} /> View
+                        </button>
+                        <button type="button" className="table-action-btn" onClick={() => handleEdit(client)}>
+                          <Pencil size={14} /> Edit
+                        </button>
+                        <button type="button" className="table-action-btn table-action-btn--danger" onClick={() => handleDelete(client.id)}>
+                          <Trash2 size={14} /> Del
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
     </div>

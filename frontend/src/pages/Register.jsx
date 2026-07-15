@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import authService from '../services/authService';
+import logo from '../assets/logo.svg';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -55,8 +56,15 @@ const Register = () => {
   return (
     <div className="auth-container">
       <div className="auth-card">
-        <h2>Create Account</h2>
-        <p className="auth-subtitle">Sign up to get started with WorkLog</p>
+        <div className="auth-brand">
+          <div className="auth-logo">
+            <img src={logo} alt="WorkLog" />
+          </div>
+          <div>
+            <h2>Create Account</h2>
+            <p className="auth-subtitle">Sign up to get started with WorkLog</p>
+          </div>
+        </div>
         {message && <div className={`alert ${messageType}`}>{message}</div>}
         <form onSubmit={handleSubmit} className="auth-form">
           <div className="form-group">
@@ -118,9 +126,9 @@ const Register = () => {
             {loading ? 'Loading...' : 'Register'}
           </button>
         </form>
-        <p className="auth-link">
-          Already have an account? <Link to="/login">Login here</Link>
-        </p>
+        <div className="auth-footer-links">
+          <p className="auth-link">Already have an account? <Link to="/login">Login here</Link></p>
+        </div>
       </div>
     </div>
   );

@@ -28,7 +28,10 @@ public class User {
     private String username;
 
     @Column
-    private String role = "USER";
+    private String role = "FREELANCER"; // Changed from USER to FREELANCER
+
+    @Column
+    private String status = "ACTIVE"; // ACTIVE, INACTIVE, SUSPENDED
 
     @JsonIgnore
     @Column(nullable = false)
@@ -40,10 +43,28 @@ public class User {
     @JsonIgnore
     private LocalDateTime resetTokenExpiry;
 
+    @JsonIgnore
+    private String temporaryPassword; // For password reset
+
+    @JsonIgnore
+    private Boolean mustChangePassword = false;
+
+    @Column
+    private LocalDateTime lastLogin;
+
+    @Column(nullable = true, updatable = false)
+    private LocalDateTime createdAt;
+
     @PrePersist
     public void prePersist() {
         if (role == null || role.isBlank()) {
-            role = "USER";
+            role = "FREELANCER";
+        }
+        if (status == null || status.isBlank()) {
+            status = "ACTIVE";
+        }
+        if (createdAt == null) {
+            createdAt = LocalDateTime.now();
         }
     }
 }

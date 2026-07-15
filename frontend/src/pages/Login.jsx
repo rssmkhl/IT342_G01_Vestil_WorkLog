@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import authService from '../services/authService';
+import logo from '../assets/logo.svg';
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -28,12 +29,16 @@ const Login = () => {
     setMessage('');
     try {
       const response = await authService.login(formData);
-      // Navigate based on role
+      // Prevent admin accounts from signing in on the user login page
       if (response.role === 'ADMIN') {
-        navigate('/dashboard/admin');
-      } else {
-        navigate('/dashboard');
+        // clear any stored credentials and instruct admin to use admin login
+        authService.logout();
+        setMessage('Admin accounts must use the Admin Login page.');
+        setMessageType('error');
+        return;
       }
+      // Regular user login
+      navigate('/dashboard');
     } catch (error) {
       setMessage(error.response?.data?.message || 'Invalid username/email or password');
       setMessageType('error');
@@ -49,8 +54,15 @@ const Login = () => {
   return (
     <div className="auth-container">
       <div className="auth-card">
-        <h2>Welcome Back</h2>
-        <p className="auth-subtitle">Sign in to your WorkLog account</p>
+        <div className="auth-brand">
+          <div className="auth-logo">
+            <img src={logo} alt="WorkLog" />
+          </div>
+          <div>
+            <h2>Welcome Back</h2>
+            <p className="auth-subtitle">Sign in to your WorkLog account</p>
+          </div>
+        </div>
         {message && <div className={`alert ${messageType}`}>{message}</div>}
         <form onSubmit={handleSubmit} className="auth-form">
           <div className="form-group">
@@ -79,15 +91,11 @@ const Login = () => {
             {loading ? 'Loading...' : 'Login'}
           </button>
         </form>
-        <p className="auth-link">
-          Forgot your password? <Link to="/forgot-password">Reset here</Link>
-        </p>
-        <p className="auth-link">
-          Don't have an account? <Link to="/register">Sign up here</Link>
-        </p>
-        <p className="auth-link">
-          <Link to="/admin/login">Login as Admin</Link>
-        </p>
+        <div className="auth-footer-links">
+          <p className="auth-link">Forgot your password? <Link to="/forgot-password">Reset here</Link></p>
+          <p className="auth-link">Don't have an account? <Link to="/register">Sign up</Link></p>
+          <p className="auth-link"><Link to="/admin/login">Admin Login</Link></p>
+        </div>
       </div>
     </div>
   );

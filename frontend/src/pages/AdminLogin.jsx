@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import authService from '../services/authService';
+import logo from '../assets/logo.svg';
 
 const AdminLogin = () => {
   const [formData, setFormData] = useState({
@@ -31,7 +32,9 @@ const AdminLogin = () => {
       if (response.role === 'ADMIN') {
         navigate('/dashboard/admin');
       } else {
-        setMessage('Access denied: Admin privileges required');
+        // clear any stored credentials and show access denied
+        authService.logout();
+        setMessage('Access denied: Admin privileges required. Use the user login if you are not an admin.');
         setMessageType('error');
       }
     } catch (error) {
@@ -49,8 +52,15 @@ const AdminLogin = () => {
   return (
     <div className="auth-container">
       <div className="auth-card">
-        <h2>Admin Login</h2>
-        <p className="auth-subtitle">Sign in to your admin account</p>
+        <div className="auth-brand">
+          <div className="auth-logo">
+            <img src={logo} alt="WorkLog" />
+          </div>
+          <div>
+            <h2>Admin Login</h2>
+            <p className="auth-subtitle">Sign in to your admin account</p>
+          </div>
+        </div>
         {message && <div className={`alert ${messageType}`}>{message}</div>}
         <form onSubmit={handleSubmit} className="auth-form">
           <div className="form-group">
@@ -79,9 +89,9 @@ const AdminLogin = () => {
             {loading ? 'Loading...' : 'Login as Admin'}
           </button>
         </form>
-        <p className="auth-link">
-          Not an admin? <Link to="/login">Sign in as user here</Link>
-        </p>
+        <div className="auth-footer-links">
+          <p className="auth-link">Not an admin? <Link to="/login">Sign in as user</Link></p>
+        </div>
       </div>
     </div>
   );

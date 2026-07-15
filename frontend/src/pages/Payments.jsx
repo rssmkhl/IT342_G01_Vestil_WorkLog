@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Pencil, Trash2, Wallet } from 'lucide-react';
 import api from '../services/api';
 
 const emptyForm = { id: null, clientId: '', amount: '', method: 'Cash', status: 'Pending', reference: '' };
@@ -128,12 +129,25 @@ const Payments = () => {
       <div className="page-header">
         <div>
           <h2>Payments</h2>
-          <p>Track received payments and outstanding balances.</p>
+          <p>Record received payments and track settlement status.</p>
+        </div>
+        <div className="header-actions">
+          {editingId && (
+            <button type="button" className="auth-button auth-button--secondary" onClick={handleCancel}>
+              Cancel Edit
+            </button>
+          )}
         </div>
       </div>
       {message ? <div className="alert success">{message}</div> : null}
       {error ? <div className="alert error">{error}</div> : null}
       <form className="card form-card" onSubmit={handleSubmit}>
+        <div className="card-header">
+          <div>
+            <h3>{editingId ? 'Edit Payment' : 'Record Payment'}</h3>
+            <p>{editingId ? 'Update the selected payment entry.' : 'Log a new payment from a client.'}</p>
+          </div>
+        </div>
         <div className="form-grid">
           <div className="form-group">
             <label>Client</label>
@@ -186,39 +200,58 @@ const Payments = () => {
             />
           </div>
         </div>
-        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-          <button className="auth-button" type="submit" disabled={isSubmitting}>
-            {isSubmitting ? 'Saving...' : editingId ? 'Update Payment' : 'Record Payment'}
-          </button>
-          {editingId && (
-            <button type="button" onClick={handleCancel} style={{ padding: '10px 20px', borderRadius: '4px', border: '1px solid #ccc', cursor: 'pointer' }}>
-              Cancel
-            </button>
-          )}
-        </div>
+        <button className="auth-button" type="submit" disabled={isSubmitting}>
+          {isSubmitting ? 'Saving...' : editingId ? 'Update Payment' : 'Record Payment'}
+        </button>
       </form>
       <div className="card list-card">
-        <h3>Payment History</h3>
-        {payments.length === 0 ? <p>No payments recorded yet.</p> : (
-          <ul className="resource-list">
-            {payments.map((payment) => (
-              <li key={payment.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div>
-                  <strong>${Number(payment.amount || 0).toFixed(2)}</strong>
-                  <span>{payment.client?.name || 'No client'} - {payment.method || 'Cash'} - {payment.status || 'Pending'}</span>
-                  <small>{payment.reference || 'No reference'}</small>
-                </div>
-                <div style={{ display: 'flex', gap: '10px' }}>
-                  <button onClick={() => handleEdit(payment)} style={{ padding: '5px 10px', fontSize: '12px' }}>
-                    Edit
-                  </button>
-                  <button onClick={() => handleDelete(payment.id)} style={{ padding: '5px 10px', fontSize: '12px' }}>
-                    Delete
-                  </button>
-                </div>
-              </li>
-            ))}
-          </ul>
+        <div className="card-header">
+          <div>
+            <h3>Payment History</h3>
+            <p>Review recently recorded payments.</p>
+          </div>
+        </div>
+        {payments.length === 0 ? (
+          <div className="empty-state">
+            <Wallet size={24} />
+            <p>No payments recorded yet.</p>
+          </div>
+        ) : (
+          <div className="table-wrap">
+            <table className="admin-table">
+              <thead>
+                <tr>
+                  <th>Amount</th>
+                  <th>Client</th>
+                  <th>Method</th>
+                  <th>Status</th>
+                  <th>Reference</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {payments.map((payment) => (
+                  <tr key={payment.id}>
+                    <td>{`$${Number(payment.amount || 0).toFixed(2)}`}</td>
+                    <td>{payment.client?.name || 'No client'}</td>
+                    <td>{payment.method || 'Cash'}</td>
+                    <td>{payment.status || 'Pending'}</td>
+                    <td>{payment.reference || 'No reference'}</td>
+                    <td>
+                      <div className="action-group">
+                        <button type="button" className="table-action-btn" onClick={() => handleEdit(payment)}>
+                          <Pencil size={14} /> Edit
+                        </button>
+                        <button type="button" className="table-action-btn table-action-btn--danger" onClick={() => handleDelete(payment.id)}>
+                          <Trash2 size={14} /> Del
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
     </div>
