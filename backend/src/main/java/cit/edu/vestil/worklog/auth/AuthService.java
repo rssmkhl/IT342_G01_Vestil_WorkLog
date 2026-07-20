@@ -12,7 +12,9 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import jakarta.annotation.PostConstruct;
 import java.time.LocalDateTime;
+import java.util.Locale;
 import java.util.UUID;
 
 @Service
@@ -26,6 +28,11 @@ public class AuthService {
 
     @Autowired(required = false)
     private JavaMailSender mailSender;
+
+    @PostConstruct
+    public void initializeDefaultAccounts() {
+        ensureDefaultAccounts();
+    }
 
     public void register(RegisterRequest registerRequest) {
         if (userRepository.existsByUsername(registerRequest.getUsername())) {
@@ -53,6 +60,8 @@ public class AuthService {
 
     public AuthResponse login(LoginRequest loginRequest) {
         System.out.println("Login attempt for: " + loginRequest.getUsernameOrEmail());
+        ensureDefaultAccounts();
+
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
@@ -83,6 +92,36 @@ public class AuthService {
         return new AuthResponse(token, user.getId(), user.getFullName(), user.getUsername(), user.getEmail(), role);
     }
 
+    public void ensureDefaultAccounts() {
+        createDefaultAccount("admin", "Admin@12345", "ADMIN");
+        createDefaultAccount("user", "User@12345", "USER");
+    }
+
+    private void createDefaultAccount(String username, String password, String role) {
+        User existing = userRepository.findByUsername(username).orElse(null);
+        if (existing == null) {
+            User user = new User();
+            user.setFullName(role.equals("ADMIN") ? "Administrator" : "Regular User");
+            user.setEmail(username + "@worklog.local");
+            user.setUsername(username);
+            user.setPassword(passwordEncoder.encode(password));
+            user.setRole(role);
+            user.setStatus("ACTIVE");
+            userRepository.save(user);
+            return;
+        }
+
+        boolean roleChanged = !role.equalsIgnoreCase(existing.getRole());
+        boolean passwordBlank = existing.getPassword() == null || existing.getPassword().isBlank();
+        if (roleChanged || passwordBlank) {
+            existing.setRole(role);
+            if (passwordBlank) {
+                existing.setPassword(passwordEncoder.encode(password));
+            }
+            userRepository.save(existing);
+        }
+    }
+
     private String resolveRole(String username) {
         if (userRepository.count() == 0 || "admin".equalsIgnoreCase(username)) {
             return "ADMIN";
@@ -91,8 +130,12 @@ public class AuthService {
     }
 
     private String normalizeRole(String role, String username) {
-        if (role != null && !role.isBlank()) {
-            return role;
+        String normalizedRole = role == null ? "" : role.trim().toUpperCase(Locale.ROOT);
+        if ("ADMIN".equals(normalizedRole)) {
+            return "ADMIN";
+        }
+        if ("USER".equals(normalizedRole) || "FREELANCER".equals(normalizedRole)) {
+            return "USER";
         }
         return "admin".equalsIgnoreCase(username) ? "ADMIN" : "USER";
     }

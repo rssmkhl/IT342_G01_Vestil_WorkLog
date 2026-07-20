@@ -10,6 +10,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Locale;
 
 @Service
 @RequiredArgsConstructor
@@ -29,8 +30,12 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     }
 
     private String normalizeRole(String role, String username) {
-        if (role != null && !role.isBlank()) {
-            return role;
+        String normalizedRole = role == null ? "" : role.trim().toUpperCase(Locale.ROOT);
+        if ("ADMIN".equals(normalizedRole)) {
+            return "ADMIN";
+        }
+        if ("USER".equals(normalizedRole) || "FREELANCER".equals(normalizedRole)) {
+            return "USER";
         }
         return "admin".equalsIgnoreCase(username) ? "ADMIN" : "USER";
     }
