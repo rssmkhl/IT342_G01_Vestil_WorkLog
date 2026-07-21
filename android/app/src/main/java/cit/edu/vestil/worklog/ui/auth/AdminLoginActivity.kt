@@ -2,8 +2,8 @@ package cit.edu.vestil.worklog.ui.auth
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.View
 import android.util.Patterns
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
@@ -11,38 +11,33 @@ import cit.edu.vestil.worklog.R
 import cit.edu.vestil.worklog.data.api.RetrofitClient
 import cit.edu.vestil.worklog.data.model.LoginRequest
 import cit.edu.vestil.worklog.data.preferences.UserPreferences
-import cit.edu.vestil.worklog.databinding.ActivityLoginBinding
-import cit.edu.vestil.worklog.ui.dashboard.DashboardActivity
+import cit.edu.vestil.worklog.databinding.ActivityAdminLoginBinding
+import cit.edu.vestil.worklog.ui.admin.AdminDashboardActivity
 import cit.edu.vestil.worklog.ui.common.ApiErrorParser
 import cit.edu.vestil.worklog.ui.common.SessionNavigator
 import kotlinx.coroutines.launch
 
-class LoginActivity : AppCompatActivity() {
-    private lateinit var binding: ActivityLoginBinding
+class AdminLoginActivity : AppCompatActivity() {
+    private lateinit var binding: ActivityAdminLoginBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Check if user is already logged in
-        if (UserPreferences.isLoggedIn()) {
-            navigateToDestination(UserPreferences.getUserRole())
+        if (UserPreferences.isLoggedIn() && UserPreferences.getUserRole() == "ADMIN") {
+            startActivity(Intent(this, AdminDashboardActivity::class.java))
+            finish()
             return
         }
 
-        binding = ActivityLoginBinding.inflate(layoutInflater)
+        binding = ActivityAdminLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         intent.getStringExtra(SessionNavigator.EXTRA_MESSAGE)?.let { showMessage(it) }
 
         binding.btnLogin.setOnClickListener { login() }
-        binding.tvRegister.setOnClickListener {
-            startActivity(Intent(this, RegisterActivity::class.java))
-        }
-        binding.tvAdminLogin.setOnClickListener {
-            startActivity(Intent(this, AdminLoginActivity::class.java))
-        }
-        binding.tvForgotPassword.setOnClickListener {
-            startActivity(Intent(this, ForgotPasswordActivity::class.java))
+        binding.tvUserLogin.setOnClickListener {
+            startActivity(Intent(this, LoginActivity::class.java))
+            finish()
         }
     }
 
@@ -66,15 +61,14 @@ class LoginActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             try {
-                val request = LoginRequest(usernameEmail, password)
-                val response = RetrofitClient.apiService.login(request)
-
+                val response = RetrofitClient.apiService.login(LoginRequest(usernameEmail, password))
                 if (response.isSuccessful && response.body() != null) {
                     val authResponse = response.body()!!
-                    if (authResponse.role == "ADMIN") {
-                        showMessage(getString(R.string.use_admin_login))
+                    if (authResponse.role != "ADMIN") {
+                        showMessage(getString(R.string.use_user_login))
                         return@launch
                     }
+
                     UserPreferences.saveAuthData(
                         authResponse.token,
                         authResponse.id,
@@ -83,41 +77,21 @@ class LoginActivity : AppCompatActivity() {
                         authResponse.email,
                         authResponse.role
                     )
-                    navigateToDestination(authResponse.role)
+                    startActivity(Intent(this@AdminLoginActivity, AdminDashboardActivity::class.java))
+                    finish()
                 } else {
-                    val statusCode = response.code()
-                    if (SessionNavigator.handleUnauthorized(this@LoginActivity, statusCode, getString(R.string.session_expired))) {
+                    if (SessionNavigator.handleUnauthorized(this@AdminLoginActivity, response.code(), getString(R.string.session_expired))) {
                         return@launch
                     }
-                    showMessage(
-                        ApiErrorParser.getErrorMessage(
-                            response,
-                            getString(R.string.invalid_credentials)
-                        )
-                    )
+                    showMessage(ApiErrorParser.getErrorMessage(response, getString(R.string.invalid_credentials)))
                 }
             } catch (e: Exception) {
-                showMessage(
-                    ApiErrorParser.getThrowableMessage(
-                        e,
-                        getString(R.string.invalid_credentials)
-                    )
-                )
+                showMessage(ApiErrorParser.getThrowableMessage(e, getString(R.string.invalid_credentials)))
             } finally {
                 binding.progressBar.visibility = View.GONE
                 binding.btnLogin.isEnabled = true
             }
         }
-    }
-
-    private fun navigateToDestination(role: String?) {
-        val targetActivity = if (role == "ADMIN") {
-            cit.edu.vestil.worklog.ui.admin.AdminDashboardActivity::class.java
-        } else {
-            DashboardActivity::class.java
-        }
-        startActivity(Intent(this, targetActivity))
-        finish()
     }
 
     private fun showMessage(message: String) {

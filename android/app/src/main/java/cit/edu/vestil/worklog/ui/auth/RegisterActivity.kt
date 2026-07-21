@@ -1,8 +1,8 @@
 package cit.edu.vestil.worklog.ui.auth
 
 import android.os.Bundle
+import android.util.Patterns
 import android.view.View
-import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
@@ -10,21 +10,16 @@ import cit.edu.vestil.worklog.R
 import cit.edu.vestil.worklog.data.api.RetrofitClient
 import cit.edu.vestil.worklog.data.model.RegisterRequest
 import cit.edu.vestil.worklog.databinding.ActivityRegisterBinding
+import cit.edu.vestil.worklog.ui.common.ApiErrorParser
 import kotlinx.coroutines.launch
 
 class RegisterActivity : AppCompatActivity() {
     private lateinit var binding: ActivityRegisterBinding
-    private val roles = arrayOf("USER", "ADMIN")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityRegisterBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
-        // Setup role dropdown
-        val adapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, roles)
-        binding.etRole.setAdapter(adapter)
-        binding.etRole.setText(roles.first(), false)
 
         binding.btnRegister.setOnClickListener { register() }
         binding.tvLogin.setOnClickListener { finish() }
@@ -36,11 +31,15 @@ class RegisterActivity : AppCompatActivity() {
         val username = binding.etUsername.text.toString().trim()
         val password = binding.etPassword.text.toString().trim()
         val confirmPassword = binding.etConfirmPassword.text.toString().trim()
-        val role = binding.etRole.text.toString().trim().ifBlank { "USER" }
 
         if (fullName.isEmpty() || email.isEmpty() || username.isEmpty() || 
             password.isEmpty() || confirmPassword.isEmpty()) {
-            Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.please_fill_all_fields), Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            Toast.makeText(this, getString(R.string.invalid_email), Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -54,18 +53,19 @@ class RegisterActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             try {
-                val request = RegisterRequest(fullName, email, username, password, confirmPassword, role)
+                val request = RegisterRequest(fullName, email, username, password, confirmPassword)
                 val response = RetrofitClient.apiService.register(request)
 
                 if (response.isSuccessful) {
-                    Toast.makeText(this@RegisterActivity, "Registration successful! Please login.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@RegisterActivity, getString(R.string.registration_success), Toast.LENGTH_SHORT).show()
                     finish()
                 } else {
-                    val errorMsg = response.errorBody()?.string() ?: "Registration failed"
+                    val errorMsg = ApiErrorParser.getErrorMessage(response, "Registration failed")
                     Toast.makeText(this@RegisterActivity, errorMsg, Toast.LENGTH_SHORT).show()
                 }
             } catch (e: Exception) {
-                Toast.makeText(this@RegisterActivity, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+                val errorMsg = ApiErrorParser.getThrowableMessage(e, "Registration failed")
+                Toast.makeText(this@RegisterActivity, errorMsg, Toast.LENGTH_SHORT).show()
             } finally {
                 binding.progressBar.visibility = View.GONE
                 binding.btnRegister.isEnabled = true

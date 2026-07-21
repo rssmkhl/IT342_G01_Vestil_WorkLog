@@ -1,5 +1,6 @@
 package cit.edu.vestil.worklog.data.api
 
+import cit.edu.vestil.worklog.BuildConfig
 import cit.edu.vestil.worklog.data.preferences.UserPreferences
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
@@ -9,10 +10,14 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 
 object RetrofitClient {
-    private const val BASE_URL = "http://10.0.2.2:8080/"
+    private const val AUTH_PATH_SEGMENT = "/api/auth/"
 
     private val loggingInterceptor = HttpLoggingInterceptor().apply {
-        level = HttpLoggingInterceptor.Level.BODY
+        level = if (BuildConfig.ENABLE_HTTP_LOGGING) {
+            HttpLoggingInterceptor.Level.BODY
+        } else {
+            HttpLoggingInterceptor.Level.NONE
+        }
     }
 
     private val authInterceptor = Interceptor { chain ->
@@ -28,9 +33,19 @@ object RetrofitClient {
         chain.proceed(request)
     }
 
+    private val sessionInterceptor = Interceptor { chain ->
+        val response = chain.proceed(chain.request())
+        val path = response.request.url.encodedPath
+        if ((response.code == 401 || response.code == 403) && !path.contains(AUTH_PATH_SEGMENT)) {
+            UserPreferences.clear()
+        }
+        response
+    }
+
     private val okHttpClient = OkHttpClient.Builder()
-        .addInterceptor(loggingInterceptor)
         .addInterceptor(authInterceptor)
+        .addInterceptor(sessionInterceptor)
+        .addInterceptor(loggingInterceptor)
         .connectTimeout(30, TimeUnit.SECONDS)
         .readTimeout(30, TimeUnit.SECONDS)
         .writeTimeout(30, TimeUnit.SECONDS)
@@ -38,7 +53,7 @@ object RetrofitClient {
 
     val apiService: ApiService by lazy {
         Retrofit.Builder()
-            .baseUrl(BASE_URL)
+            .baseUrl(BuildConfig.API_BASE_URL)
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()

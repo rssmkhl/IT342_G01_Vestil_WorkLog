@@ -1,11 +1,9 @@
 package cit.edu.vestil.worklog.data.model
 
-data class AuthResponse(
-    val token: String,
-    val type: String? = null,
-    val id: Long,
+data class AdminCreateUserRequest(
     val fullName: String,
     val username: String,
     val email: String,
-    val role: String
+    val role: String,
+    val password: String? = null
 )

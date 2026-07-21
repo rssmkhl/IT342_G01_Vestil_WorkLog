@@ -85,7 +85,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/total_users"
+                    android:text="@string/total_freelancers"
                     android:textColor="@color/brand_text_secondary"
                     android:textStyle="bold" />
 
@@ -111,7 +111,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/total_clients"
+                    android:text="@string/active_clients"
                     android:textColor="@color/brand_text_secondary"
                     android:textStyle="bold" />
 
@@ -137,7 +137,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/total_work_logs"
+                    android:text="@string/work_logs_this_week"
                     android:textColor="@color/brand_text_secondary"
                     android:textStyle="bold" />
 
@@ -193,6 +193,16 @@
                     android:textColor="@color/brand_text_primary"
                     android:textStyle="bold" />
 
+                <Button
+                    android:id="@+id/btnCreateUser"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:background="@drawable/bg_primary_button"
+                    android:text="@string/create_user"
+                    android:textAllCaps="false"
+                    android:textColor="@color/white" />
+
                 <LinearLayout
                     android:id="@+id/usersContainer"
                     android:layout_width="match_parent"
@@ -235,12 +245,66 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:text="@string/admin_clients"
+                    android:textColor="@color/brand_text_primary"
+                    android:textStyle="bold" />
+
+                <LinearLayout
+                    android:id="@+id/adminClientsContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:orientation="vertical" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/bg_surface_card"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:text="@string/payment_status"
                     android:textColor="@color/brand_text_primary"
                     android:textStyle="bold" />
 
                 <LinearLayout
                     android:id="@+id/adminPaymentsContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:orientation="vertical" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/bg_surface_card"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/audit_logs"
+                    android:textColor="@color/brand_text_primary"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvAuditEmptyState"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:text="@string/no_activity"
+                    android:textColor="@color/brand_text_secondary" />
+
+                <LinearLayout
+                    android:id="@+id/auditLogsContainer"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"

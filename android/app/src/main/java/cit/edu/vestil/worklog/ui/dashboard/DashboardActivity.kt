@@ -9,11 +9,13 @@ import cit.edu.vestil.worklog.data.api.RetrofitClient
 import cit.edu.vestil.worklog.data.preferences.UserPreferences
 import cit.edu.vestil.worklog.databinding.ActivityDashboardBinding
 import cit.edu.vestil.worklog.ui.admin.AdminDashboardActivity
-import cit.edu.vestil.worklog.ui.auth.LoginActivity
+import cit.edu.vestil.worklog.ui.common.ApiErrorParser
+import cit.edu.vestil.worklog.ui.common.SessionNavigator
 import cit.edu.vestil.worklog.ui.client.ClientsActivity
 import cit.edu.vestil.worklog.ui.payment.PaymentsActivity
 import cit.edu.vestil.worklog.ui.worklog.WorkLogsActivity
 import cit.edu.vestil.worklog.ui.navigation.AppNavigator
+import android.widget.Toast
 import kotlinx.coroutines.launch
 
 class DashboardActivity : AppCompatActivity() {
@@ -56,9 +58,19 @@ class DashboardActivity : AppCompatActivity() {
                     binding.tvTotalClients.text = summary.totalClients.toString()
                     binding.tvTotalWorkLogs.text = summary.totalWorkLogs.toString()
                     binding.tvTotalPayments.text = "$${summary.totalPayments}"
+                } else if (!SessionNavigator.handleUnauthorized(this@DashboardActivity, response.code())) {
+                    Toast.makeText(
+                        this@DashboardActivity,
+                        ApiErrorParser.getErrorMessage(response, getString(cit.edu.vestil.worklog.R.string.unable_to_load_dashboard)),
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             } catch (e: Exception) {
-                e.printStackTrace()
+                Toast.makeText(
+                    this@DashboardActivity,
+                    ApiErrorParser.getThrowableMessage(e, getString(cit.edu.vestil.worklog.R.string.unable_to_load_dashboard)),
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         }
     }

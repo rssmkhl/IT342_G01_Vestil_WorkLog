@@ -10,13 +10,16 @@ import cit.edu.vestil.worklog.data.api.RetrofitClient
 import cit.edu.vestil.worklog.data.model.Client
 import cit.edu.vestil.worklog.data.model.Payment
 import cit.edu.vestil.worklog.databinding.ActivityPaymentsBinding
+import cit.edu.vestil.worklog.ui.common.ApiErrorParser
 import cit.edu.vestil.worklog.ui.common.RowRenderer
+import cit.edu.vestil.worklog.ui.common.SessionNavigator
 import cit.edu.vestil.worklog.ui.navigation.AppNavigator
 import kotlinx.coroutines.launch
 
 class PaymentsActivity : AppCompatActivity() {
     private lateinit var binding: ActivityPaymentsBinding
     private var clients: List<Client> = emptyList()
+    private var editingPaymentId: Long? = null
     private val methods by lazy {
         listOf(
             getString(cit.edu.vestil.worklog.R.string.cash),
@@ -43,6 +46,7 @@ class PaymentsActivity : AppCompatActivity() {
         binding.spMethod.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, methods)
         binding.spStatus.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, statuses)
         binding.btnSavePayment.setOnClickListener { savePayment() }
+        binding.btnCancelEdit.setOnClickListener { resetForm() }
 
         loadClients()
         loadPayments()
@@ -59,10 +63,12 @@ class PaymentsActivity : AppCompatActivity() {
                     binding.spClient.adapter =
                         ArrayAdapter(this@PaymentsActivity, android.R.layout.simple_spinner_dropdown_item, clientNames)
                 } else {
-                    showError("Unable to load clients right now.")
+                    if (!SessionNavigator.handleUnauthorized(this@PaymentsActivity, response.code())) {
+                        showError(ApiErrorParser.getErrorMessage(response, getString(cit.edu.vestil.worklog.R.string.unable_to_load_clients)))
+                    }
                 }
             } catch (e: Exception) {
-                showError("Unable to load clients right now.")
+                showError(ApiErrorParser.getThrowableMessage(e, getString(cit.edu.vestil.worklog.R.string.unable_to_load_clients)))
             }
         }
     }
@@ -74,10 +80,12 @@ class PaymentsActivity : AppCompatActivity() {
                 if (response.isSuccessful) {
                     renderPayments(response.body().orEmpty())
                 } else {
-                    showError("Unable to load payments right now.")
+                    if (!SessionNavigator.handleUnauthorized(this@PaymentsActivity, response.code())) {
+                        showError(ApiErrorParser.getErrorMessage(response, getString(cit.edu.vestil.worklog.R.string.unable_to_load_payments)))
+                    }
                 }
             } catch (e: Exception) {
-                showError("Unable to load payments right now.")
+                showError(ApiErrorParser.getThrowableMessage(e, getString(cit.edu.vestil.worklog.R.string.unable_to_load_payments)))
             }
         }
     }
@@ -104,28 +112,45 @@ class PaymentsActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             try {
-                val response = RetrofitClient.apiService.createPayment(
-                    Payment(
-                        client = Client(id = clients[clientIndex].id),
-                        amount = amountValue.toBigDecimal(),
-                        method = method,
-                        status = status,
-                        reference = reference.ifBlank { null }
+                val response = if (editingPaymentId != null) {
+                    RetrofitClient.apiService.updatePayment(
+                        editingPaymentId!!,
+                        Payment(
+                            client = Client(id = clients[clientIndex].id),
+                            amount = amountValue.toBigDecimal(),
+                            method = method,
+                            status = status,
+                            reference = reference.ifBlank { null }
+                        )
                     )
-                )
+                } else {
+                    RetrofitClient.apiService.createPayment(
+                        Payment(
+                            client = Client(id = clients[clientIndex].id),
+                            amount = amountValue.toBigDecimal(),
+                            method = method,
+                            status = status,
+                            reference = reference.ifBlank { null }
+                        )
+                    )
+                }
                 if (response.isSuccessful) {
-                    binding.spClient.setSelection(0)
-                    binding.etAmount.text?.clear()
-                    binding.spMethod.setSelection(0)
-                    binding.spStatus.setSelection(0)
-                    binding.etReference.text?.clear()
-                    showMessage("Payment recorded successfully.")
+                    showMessage(
+                        if (editingPaymentId != null) {
+                            getString(cit.edu.vestil.worklog.R.string.payment_updated)
+                        } else {
+                            getString(cit.edu.vestil.worklog.R.string.payment_saved)
+                        }
+                    )
+                    resetForm()
                     loadPayments()
                 } else {
-                    showError("Failed to record payment. Please try again.")
+                    if (!SessionNavigator.handleUnauthorized(this@PaymentsActivity, response.code())) {
+                        showError(ApiErrorParser.getErrorMessage(response, "Failed to record payment. Please try again."))
+                    }
                 }
             } catch (e: Exception) {
-                showError("Failed to record payment. Please try again.")
+                showError(ApiErrorParser.getThrowableMessage(e, "Failed to record payment. Please try again."))
             } finally {
                 binding.progressBar.visibility = View.GONE
                 binding.btnSavePayment.isEnabled = true
@@ -141,9 +166,67 @@ class PaymentsActivity : AppCompatActivity() {
             val title = "$${payment.amount}"
             val subtitle =
                 "${payment.client?.name ?: getString(cit.edu.vestil.worklog.R.string.no_client)} • ${payment.method ?: getString(cit.edu.vestil.worklog.R.string.cash)} • ${payment.status ?: getString(cit.edu.vestil.worklog.R.string.pending)}"
-            val meta = payment.reference ?: getString(cit.edu.vestil.worklog.R.string.no_reference)
-            RowRenderer.addRow(binding.paymentsListContainer, title, subtitle, meta)
+            val meta = listOfNotNull(
+                payment.reference ?: getString(cit.edu.vestil.worklog.R.string.no_reference),
+                payment.paymentDate
+            ).joinToString(" • ")
+            RowRenderer.addRow(
+                binding.paymentsListContainer,
+                title,
+                subtitle,
+                meta,
+                actions = listOf(
+                    RowRenderer.RowAction(getString(cit.edu.vestil.worklog.R.string.edit)) {
+                        populateForm(payment)
+                    },
+                    RowRenderer.RowAction(getString(cit.edu.vestil.worklog.R.string.delete)) {
+                        deletePayment(payment)
+                    }
+                )
+            )
         }
+    }
+
+    private fun deletePayment(payment: Payment) {
+        lifecycleScope.launch {
+            try {
+                val response = RetrofitClient.apiService.deletePayment(payment.id ?: return@launch)
+                if (response.isSuccessful) {
+                    if (editingPaymentId == payment.id) {
+                        resetForm()
+                    }
+                    showMessage(getString(cit.edu.vestil.worklog.R.string.payment_deleted))
+                    loadPayments()
+                } else if (!SessionNavigator.handleUnauthorized(this@PaymentsActivity, response.code())) {
+                    showError(ApiErrorParser.getErrorMessage(response, "Unable to delete this payment."))
+                }
+            } catch (e: Exception) {
+                showError(ApiErrorParser.getThrowableMessage(e, "Unable to delete this payment."))
+            }
+        }
+    }
+
+    private fun populateForm(payment: Payment) {
+        editingPaymentId = payment.id
+        val selectedClientIndex = clients.indexOfFirst { it.id == payment.client?.id }
+        binding.spClient.setSelection(if (selectedClientIndex >= 0) selectedClientIndex + 1 else 0)
+        binding.etAmount.setText(payment.amount.toPlainString())
+        binding.spMethod.setSelection(methods.indexOf(payment.method).coerceAtLeast(0))
+        binding.spStatus.setSelection(statuses.indexOf(payment.status).coerceAtLeast(0))
+        binding.etReference.setText(payment.reference.orEmpty())
+        binding.btnSavePayment.text = getString(cit.edu.vestil.worklog.R.string.update_payment)
+        binding.btnCancelEdit.visibility = View.VISIBLE
+    }
+
+    private fun resetForm() {
+        editingPaymentId = null
+        binding.spClient.setSelection(0)
+        binding.etAmount.text?.clear()
+        binding.spMethod.setSelection(0)
+        binding.spStatus.setSelection(0)
+        binding.etReference.text?.clear()
+        binding.btnSavePayment.text = getString(cit.edu.vestil.worklog.R.string.record_payment)
+        binding.btnCancelEdit.visibility = View.GONE
     }
 
     private fun showMessage(message: String) {

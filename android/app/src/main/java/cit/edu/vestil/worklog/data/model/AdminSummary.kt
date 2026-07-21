@@ -1,8 +1,15 @@
 package cit.edu.vestil.worklog.data.model
 
+import com.google.gson.annotations.SerializedName
+
 data class AdminSummary(
-    val totalUsers: Long = 0,
-    val totalClients: Long = 0,
-    val totalWorkLogs: Long = 0,
-    val pendingPayments: Long = 0
+    @SerializedName("totalFreelancers")
+    val totalFreelancers: Long = 0,
+    @SerializedName("activeClients")
+    val activeClients: Long = 0,
+    @SerializedName("workLogsThisWeek")
+    val workLogsThisWeek: Long = 0,
+    val pendingPayments: Long = 0,
+    val totalRevenue: Double = 0.0,
+    val activeProjects: Long = 0
 )
