@@ -11,7 +11,6 @@ import cit.edu.vestil.worklog.payment.PaymentRepository;
 import cit.edu.vestil.worklog.worklog.WorkLog;
 import cit.edu.vestil.worklog.worklog.WorkLogRepository;
 import lombok.AllArgsConstructor;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;

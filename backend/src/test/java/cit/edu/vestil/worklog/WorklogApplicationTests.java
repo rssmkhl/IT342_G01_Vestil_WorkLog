@@ -8,7 +8,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 		"spring.datasource.driver-class-name=org.h2.Driver",
 		"spring.datasource.username=sa",
 		"spring.datasource.password=",
-		"spring.jpa.hibernate.ddl-auto=create-drop"
+		"spring.jpa.hibernate.ddl-auto=create-drop",
+		"jwt.secret=TestJwtSecretKeyForWorklogApp12345",
+		"jwt.expiration=86400000"
 })
 class WorklogApplicationTests {
 
