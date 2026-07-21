@@ -1,19 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<<<<<<< HEAD
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:gravity="center"
-    android:padding="16dp"
-    android:orientation="vertical">
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Admin Dashboard Screen"
-        android:textSize="24sp" />
-</LinearLayout>
-=======
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -264,4 +249,3 @@
         </LinearLayout>
     </LinearLayout>
 </ScrollView>
->>>>>>> ff35013e31d75d3e0f28df95875ac4c6d7e6883b

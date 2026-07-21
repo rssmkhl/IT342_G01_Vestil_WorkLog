@@ -33,7 +33,7 @@ const authService = {
     if (userStr) {
       try {
         return JSON.parse(userStr);
-      } catch (e) {
+      } catch {
         // ignore, fall back to token
       }
     }
@@ -42,7 +42,7 @@ const authService = {
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
       return payload;
-    } catch (error) {
+    } catch {
       return null;
     }
   },

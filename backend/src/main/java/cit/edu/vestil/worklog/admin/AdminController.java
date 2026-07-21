@@ -23,6 +23,7 @@ import java.math.BigDecimal;
 import java.security.Principal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 
@@ -62,8 +63,8 @@ public class AdminController {
 
     @GetMapping("/users")
     public List<UserRow> getUsers() {
-        return userRepository.findAll(Sort.by(Sort.Direction.ASC, "id"))
-                .stream()
+        return userRepository.findAll().stream()
+                .sorted(Comparator.comparing(User::getId))
                 .map(user -> new UserRow(
                         user.getId(),
                         user.getFullName(),
@@ -189,8 +190,8 @@ public class AdminController {
     @GetMapping("/worklogs")
     @Transactional(readOnly = true)
     public List<WorkLogRow> getWorkLogs() {
-        return workLogRepository.findAll(Sort.by(Sort.Direction.DESC, "date"))
-                .stream()
+        return workLogRepository.findAll().stream()
+                .sorted(Comparator.comparing(WorkLog::getDate, Comparator.nullsLast(Comparator.naturalOrder())).reversed())
                 .map(this::toWorkLogRow)
                 .toList();
     }
@@ -222,8 +223,8 @@ public class AdminController {
     @GetMapping("/clients")
     @Transactional(readOnly = true)
     public List<ClientRow> getClients() {
-        return clientRepository.findAll(Sort.by(Sort.Direction.DESC, "createdAt"))
-                .stream()
+        return clientRepository.findAll().stream()
+                .sorted(Comparator.comparing(Client::getCreatedAt, Comparator.nullsLast(Comparator.naturalOrder())).reversed())
                 .map(this::toClientRow)
                 .toList();
     }
@@ -241,8 +242,8 @@ public class AdminController {
     @GetMapping("/payments")
     @Transactional(readOnly = true)
     public List<PaymentRow> getPayments() {
-        return paymentRepository.findAll(Sort.by(Sort.Direction.DESC, "paymentDate"))
-                .stream()
+        return paymentRepository.findAll().stream()
+                .sorted(Comparator.comparing(Payment::getPaymentDate, Comparator.nullsLast(Comparator.naturalOrder())).reversed())
                 .map(this::toPaymentRow)
                 .toList();
     }

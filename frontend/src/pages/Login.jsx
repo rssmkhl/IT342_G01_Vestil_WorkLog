@@ -3,6 +3,14 @@ import { Link, useNavigate } from 'react-router-dom';
 import authService from '../services/authService';
 import logo from '../assets/logo.svg';
 
+const getAuthErrorMessage = (error) => {
+  if (!error.response) {
+    return 'Cannot reach the server. Make sure the backend is running and try again.';
+  }
+
+  return error.response?.data?.message || 'Invalid username/email or password';
+};
+
 const Login = () => {
   const [formData, setFormData] = useState({
     usernameOrEmail: '',
@@ -40,7 +48,7 @@ const Login = () => {
       // Regular user login
       navigate('/dashboard');
     } catch (error) {
-      setMessage(error.response?.data?.message || 'Invalid username/email or password');
+      setMessage(getAuthErrorMessage(error));
       setMessageType('error');
     } finally {
       setLoading(false);
@@ -93,7 +101,7 @@ const Login = () => {
         </form>
         <div className="auth-footer-links">
           <p className="auth-link">Forgot your password? <Link to="/forgot-password">Reset here</Link></p>
-          <p className="auth-link">Don't have an account? <Link to="/register">Sign up</Link></p>
+          <p className="auth-link">Don&apos;t have an account? <Link to="/register">Sign up</Link></p>
           <p className="auth-link"><Link to="/admin/login">Admin Login</Link></p>
         </div>
       </div>

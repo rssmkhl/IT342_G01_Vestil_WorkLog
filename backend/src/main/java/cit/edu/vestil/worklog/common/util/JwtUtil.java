@@ -2,6 +2,7 @@ package cit.edu.vestil.worklog.common.util;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -14,11 +15,13 @@ import java.util.function.Function;
 
 @Component
 public class JwtUtil {
-    private static final String SECRET = "worklog-secret-key-for-jwt-token-generation-very-long-secure-key-2024";
     private static final long EXPIRATION_TIME = 86400000; // 24 hours
 
+    @Value("${jwt.secret:dev-only-change-me-please-override-in-env-2026}")
+    private String secret;
+
     private SecretKey getSigningKey() {
-        return Keys.hmacShaKeyFor(SECRET.getBytes(StandardCharsets.UTF_8));
+        return Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
 
     public String extractUsername(String token) {

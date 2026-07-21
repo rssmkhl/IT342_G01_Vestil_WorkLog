@@ -3,6 +3,14 @@ import { Link, useNavigate } from 'react-router-dom';
 import authService from '../services/authService';
 import logo from '../assets/logo.svg';
 
+const getAuthErrorMessage = (error) => {
+  if (!error.response) {
+    return 'Cannot reach the server. Make sure the backend is running and try again.';
+  }
+
+  return error.response?.data?.message || 'Invalid username/email or password';
+};
+
 const AdminLogin = () => {
   const [formData, setFormData] = useState({
     usernameOrEmail: '',
@@ -38,7 +46,7 @@ const AdminLogin = () => {
         setMessageType('error');
       }
     } catch (error) {
-      setMessage(error.response?.data?.message || 'Invalid username/email or password');
+      setMessage(getAuthErrorMessage(error));
       setMessageType('error');
     } finally {
       setLoading(false);

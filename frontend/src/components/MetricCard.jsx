@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import { BarChart } from 'lucide-react';
 
 const MetricCard = ({ title, value, description, icon: Icon, accentClass, loading = false }) => {
@@ -21,6 +22,15 @@ const MetricCard = ({ title, value, description, icon: Icon, accentClass, loadin
       </div>
     </div>
   );
+};
+
+MetricCard.propTypes = {
+  title: PropTypes.node.isRequired,
+  value: PropTypes.node.isRequired,
+  description: PropTypes.node,
+  icon: PropTypes.elementType,
+  accentClass: PropTypes.string,
+  loading: PropTypes.bool,
 };
 
 export default MetricCard;

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Routes, Route, useNavigate } from 'react-router-dom';
 import { CircleDollarSign, Clock3, FileText, PlusCircle, Sparkles, Users, Wallet } from 'lucide-react';
 import Sidebar from '../components/Sidebar';
@@ -22,8 +22,14 @@ const Dashboard = () => {
   const [recentPayments, setRecentPayments] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const hasLoadedDashboard = useRef(false);
 
   useEffect(() => {
+    if (hasLoadedDashboard.current) {
+      return;
+    }
+
+    hasLoadedDashboard.current = true;
     const currentUser = authService.getCurrentUser();
     setUser(currentUser);
 

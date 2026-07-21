@@ -22,7 +22,7 @@ class LoginActivity : AppCompatActivity() {
 
         // Check if user is already logged in
         if (UserPreferences.isLoggedIn()) {
-            navigateToDashboard()
+            navigateToDestination(UserPreferences.getUserRole())
             return
         }
 
@@ -62,7 +62,7 @@ class LoginActivity : AppCompatActivity() {
                         authResponse.email,
                         authResponse.role
                     )
-                    navigateToDashboard()
+                    navigateToDestination(authResponse.role)
                 } else {
                     Toast.makeText(this@LoginActivity, "Invalid credentials", Toast.LENGTH_SHORT).show()
                 }
@@ -75,8 +75,13 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
-    private fun navigateToDashboard() {
-        startActivity(Intent(this, DashboardActivity::class.java))
+    private fun navigateToDestination(role: String?) {
+        val targetActivity = if (role == "ADMIN") {
+            cit.edu.vestil.worklog.ui.admin.AdminDashboardActivity::class.java
+        } else {
+            DashboardActivity::class.java
+        }
+        startActivity(Intent(this, targetActivity))
         finish()
     }
 }

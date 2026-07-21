@@ -1,29 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Worklog</string>
-<<<<<<< HEAD
-    <string name="login">Login</string>
-    <string name="register">Register</string>
-    <string name="username_or_email">Username or Email</string>
-    <string name="password">Password</string>
-    <string name="full_name">Full Name</string>
-    <string name="email">Email</string>
-    <string name="username">Username</string>
-    <string name="confirm_password">Confirm Password</string>
-    <string name="role">Role</string>
-    <string name="user">User</string>
-    <string name="admin">Admin</string>
-    <string name="dashboard">Dashboard</string>
-    <string name="clients">Clients</string>
-    <string name="worklogs">Work Logs</string>
-    <string name="payments">Payments</string>
-    <string name="logout">Logout</string>
-    <string name="loading">Loading...</string>
-    <string name="error">Error</string>
-    <string name="success">Success</string>
-    <string name="invalid_credentials">Invalid credentials</string>
-    <string name="passwords_not_match">Passwords do not match</string>
-=======
     <string name="passwords_not_match">Passwords do not match</string>
     <string name="login">Login</string>
     <string name="register">Register</string>
@@ -38,6 +15,7 @@
     <string name="password">Password</string>
     <string name="confirm_password">Confirm Password</string>
     <string name="role">Role</string>
+    <string name="user">User</string>
     <string name="welcome">Welcome</string>
     <string name="dashboard_subtitle">Keep clients, work logs, and payments organized in one place.</string>
     <string name="clients_subtitle">Manage client relationships and project contacts.</string>
@@ -50,6 +28,10 @@
     <string name="dashboard">Dashboard</string>
     <string name="admin">Admin</string>
     <string name="logout">Logout</string>
+    <string name="loading">Loading...</string>
+    <string name="error">Error</string>
+    <string name="success">Success</string>
+    <string name="invalid_credentials">Invalid credentials</string>
     <string name="admin_dashboard">Admin Dashboard</string>
     <string name="clients_screen_title">Clients</string>
     <string name="payments_screen_title">Payments</string>
@@ -105,5 +87,4 @@
     <string name="delete">Delete</string>
     <string name="quick_access">Quick Access</string>
     <string name="same_flow_note">Same routes and backend flow as the web app, adapted for mobile.</string>
->>>>>>> ff35013e31d75d3e0f28df95875ac4c6d7e6883b
 </resources>

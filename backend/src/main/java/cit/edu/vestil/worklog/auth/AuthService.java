@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import jakarta.annotation.PostConstruct;
 import java.time.LocalDateTime;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -59,25 +60,21 @@ public class AuthService {
     }
 
     public AuthResponse login(LoginRequest loginRequest) {
-        System.out.println("Login attempt for: " + loginRequest.getUsernameOrEmail());
+        String loginIdentifier = loginRequest.getUsernameOrEmail();
+        System.out.println("Login attempt for: " + loginIdentifier);
         ensureDefaultAccounts();
 
-        try {
-            authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(
-                            loginRequest.getUsernameOrEmail(),
-                            loginRequest.getPassword()
-                    )
-            );
-        } catch (Exception e) {
-            System.err.println("Authentication failed: " + e.getMessage());
+        Optional<User> matchingUser = userRepository.findByUsernameOrEmail(loginIdentifier, loginIdentifier)
+                .or(() -> userRepository.findByUsername(loginIdentifier))
+                .or(() -> userRepository.findByEmail(loginIdentifier));
+
+        User user = matchingUser.orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Verify password explicitly to avoid potential AuthenticationManager encoding mismatch
+        if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
+            System.err.println("Password mismatch for user: " + user.getUsername());
             throw new RuntimeException("Invalid username or password");
         }
-
-        User user = userRepository.findByUsernameOrEmail(
-                loginRequest.getUsernameOrEmail(),
-                loginRequest.getUsernameOrEmail()
-        ).orElseThrow(() -> new RuntimeException("User not found"));
 
         System.out.println("Found user: " + user.getUsername() + ", role: " + user.getRole());
 
@@ -87,6 +84,10 @@ public class AuthService {
             userRepository.save(user);
             System.out.println("Updated user role to: " + role);
         }
+
+        user.setLastLogin(LocalDateTime.now());
+        userRepository.save(user);
+
         String token = jwtUtil.generateToken(user.getUsername(), user.getId(), user.getFullName(), role);
         System.out.println("Generated token for user: " + user.getUsername());
         return new AuthResponse(token, user.getId(), user.getFullName(), user.getUsername(), user.getEmail(), role);
