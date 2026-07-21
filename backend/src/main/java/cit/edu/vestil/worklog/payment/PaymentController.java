@@ -16,7 +16,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/payments")
-@CrossOrigin(origins = "*")
 @AllArgsConstructor
 public class PaymentController {
     private final PaymentRepository paymentRepository;

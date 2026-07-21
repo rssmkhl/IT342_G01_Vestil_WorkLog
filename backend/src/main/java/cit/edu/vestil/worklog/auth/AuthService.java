@@ -4,6 +4,7 @@ import cit.edu.vestil.worklog.common.entity.User;
 import cit.edu.vestil.worklog.common.repository.UserRepository;
 import cit.edu.vestil.worklog.common.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -19,6 +20,9 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class AuthService {
+
+    @Value("${app.frontend-base-url:https://worklog-6ac3.onrender.com}")
+    private String frontendBaseUrl;
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -157,11 +161,12 @@ public class AuthService {
             System.out.println("Mail sender not configured. Reset token (for testing): " + token);
             return;
         }
+        String resetBaseUrl = frontendBaseUrl != null ? frontendBaseUrl.replaceAll("/+$", "") : "https://worklog-6ac3.onrender.com";
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(email);
         message.setSubject("Password Reset Request");
         message.setText("To reset your password, click the link below:\n" +
-                "http://localhost:3000/reset-password?token=" + token + "\n\n" +
+                resetBaseUrl + "/reset-password?token=" + token + "\n\n" +
                 "This link expires in 1 hour.");
         message.setFrom("your-email@gmail.com");
         

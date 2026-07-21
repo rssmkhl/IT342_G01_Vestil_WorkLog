@@ -1,23 +1,23 @@
 import axios from 'axios';
 
-const resolveDefaultBaseUrl = () => {
+const DEFAULT_RENDER_API_BASE_URL = 'https://worklog-backend-xts0.onrender.com/api';
+
+const resolveBaseUrl = () => {
+  const configuredBaseUrl = import.meta.env.VITE_API_BASE_URL?.trim();
+  if (configuredBaseUrl) {
+    return configuredBaseUrl;
+  }
+
   if (import.meta.env.DEV) {
-    // Use the Vite dev proxy in local development to avoid brittle CORS issues.
+    // Use the Vite dev proxy in local development.
     return '/api';
   }
 
-  if (typeof window === 'undefined') {
-    return 'http://localhost:8080/api';
-  }
-
-  const { hostname, protocol } = window.location;
-  return `${protocol}//${hostname || 'localhost'}:8080/api`;
+  return DEFAULT_RENDER_API_BASE_URL;
 };
 
-const configuredBaseUrl = import.meta.env.VITE_API_BASE_URL || resolveDefaultBaseUrl();
-
 const api = axios.create({
-  baseURL: configuredBaseUrl.replace(/\/$/, ''),
+  baseURL: resolveBaseUrl().replace(/\/$/, ''),
   headers: {
     'Content-Type': 'application/json',
   },

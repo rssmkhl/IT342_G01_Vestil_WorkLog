@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
-import api from '../services/api';
+import authService from '../services/authService';
 
 const ResetPassword = () => {
   const [searchParams] = useSearchParams();
@@ -29,12 +29,12 @@ const ResetPassword = () => {
     setLoading(true);
     setMessage('');
     try {
-      const response = await api.post('/auth/reset-password', { 
+      const response = await authService.resetPassword({
         token, 
         newPassword, 
         confirmPassword 
       });
-      setMessage(response.data.message);
+      setMessage(response.message);
       setMessageType('success');
       setTimeout(() => {
         navigate('/login');

@@ -30,7 +30,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    @Value("${cors.allowed-origin-patterns:http://localhost:*,http://127.0.0.1:*}")
+    @Value("${cors.allowed-origin-patterns:https://worklog-6ac3.onrender.com,http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000,http://127.0.0.1:3000}")
     private String allowedOriginPatterns;
 
     private final AuthenticationConfiguration authenticationConfiguration;

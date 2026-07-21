@@ -13,7 +13,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/clients")
-@CrossOrigin(origins = "*")
 @AllArgsConstructor
 public class ClientController {
     private final ClientRepository clientRepository;

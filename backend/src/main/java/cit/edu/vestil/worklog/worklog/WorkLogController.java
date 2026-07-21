@@ -13,7 +13,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/worklogs")
-@CrossOrigin(origins = "*")
 @AllArgsConstructor
 public class WorkLogController {
     private final WorkLogRepository workLogRepository;

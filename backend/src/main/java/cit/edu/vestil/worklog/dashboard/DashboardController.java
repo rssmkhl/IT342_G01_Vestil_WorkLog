@@ -10,7 +10,6 @@ import java.security.Principal;
 
 @RestController
 @RequestMapping("/api/dashboard")
-@CrossOrigin(origins = "*")
 @AllArgsConstructor
 public class DashboardController {
     private final DashboardService dashboardService;

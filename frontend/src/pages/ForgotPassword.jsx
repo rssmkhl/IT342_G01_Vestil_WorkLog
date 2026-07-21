@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import api from '../services/api';
+import authService from '../services/authService';
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
@@ -13,8 +13,8 @@ const ForgotPassword = () => {
     setLoading(true);
     setMessage('');
     try {
-      const response = await api.post('/auth/forgot-password', { email });
-      setMessage(response.data.message);
+      const response = await authService.forgotPassword(email);
+      setMessage(response.message);
       setMessageType('success');
     } catch (error) {
       setMessage(error.response?.data?.message || 'Something went wrong');
