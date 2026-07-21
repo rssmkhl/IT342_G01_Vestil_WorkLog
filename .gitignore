@@ -1,3 +1,4 @@
+frontend/.env.example
 worklog-web.code-workspace
 .env
 HELP.md
